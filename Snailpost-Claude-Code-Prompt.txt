@@ -1,0 +1,851 @@
+SNAILPOST — CLAUDE CODE BUILD PROMPT
+A day in my life, as a postcard.
+
+Copy this entire prompt into Claude Code and attach the provided moodboard PDF.
+The two interaction references below are part of the brief, not optional extras.
+The brief below asks Claude to build the app. This document itself is a design
+and engineering handoff; it does not claim the app has already been built.
+
+YOUR ROLE AND MANDATE
+
+You are the lead product designer and product engineer for Snailpost, a mobile-first
+storytelling product for a design competition. Build a working, thoughtfully
+designed application that we can deploy to Vercel and demonstrate in a video
+under seven minutes.
+
+Work as a designer who can ship: make strong visual decisions, implement the
+core journey, run real tests, fix failures, and document the work. Do not stop
+after generating a plan or a collection of static screens. Keep the scope
+focused enough to finish the complete sender-to-recipient experience.
+
+Inspect the existing repository, project instructions, assets, dependencies,
+and any supplied Ramp card component before changing anything. Preserve useful
+existing work. Use the attached moodboard as the visual reference. Make
+reasonable decisions where this brief leaves room and record the rationale.
+Ask only for information or access that genuinely blocks the next step;
+continue other work while an integration is unavailable.
+
+REQUIRED DESIGN REFERENCES
+
+1. Attached moodboard: Untitled design.pdf.
+   Use it for paper, stamps, lettering, the snail identity, and the contrasting
+   Peach Pit versus Pinefolk/Tierra visual directions.
+
+2. Ramp sketchbook flip reference supplied by the user:
+   https://x.com/jeanxcrj/status/2064835647152787800
+   Use this as the primary motion reference for physically handling and turning
+   a postcard. Adapt the sketchbook feeling to a loose, two-sided postcard.
+
+3. Ticket-card / card-cluster reference supplied by the user:
+   https://github.com/ela1ne0/ticket-card
+   Use this to inform a tangible cluster of postcards in the keepsake collection
+   and a smaller cluster of collected moments on Today.
+
+Before implementation, inspect the actual video/demo and repository if your
+environment can access them. Read the README, relevant component source,
+dependencies, and license before adapting any code. Preserve required notices.
+If reuse permission is absent or unclear, implement the interaction independently.
+
+Reference-access note: the moodboard was visually inspected when preparing
+this handoff. The X video and GitHub repository could not be inspected in that
+environment. The detailed cluster and motion behaviors below are proposed
+Snailpost adaptations based on the user's descriptions, not verified claims
+about what the references implement. Verify against the supplied references
+when accessible and document any differences. Do not pretend to have seen
+inaccessible content or let reference access block the rest of the build.
+
+1. THE PRODUCT STORY
+
+Product name: Snailpost.
+Primary line: "A day in my life, as a postcard."
+Supporting line: "Little moments. A little closer."
+
+Start with a specific audience: college students and young adults living far
+from home who want to share everyday life with a parent or grandparent in
+another time zone, especially someone who prefers familiar messaging apps
+over learning another social platform.
+
+This audience is a starting hypothesis, not a claim that we have conducted
+research. Age does not determine technical ability. Design for preferences,
+readability, and the relationship between sender and recipient.
+
+The job to be done:
+"When our schedules don't line up, help me turn a few ordinary moments into
+something personal my family can open, hear, and keep, without arranging a call
+or performing for a social feed."
+
+The problem is not simply sending another photo. Small details arrive scattered,
+calls require coordination, and an ordinary day can feel too unimportant to
+share. Snailpost gives those details a beginning, a sequence, a voice, and an
+object worth keeping.
+
+The core ritual:
+- During the day, collect one to six moments.
+- In the evening, arrange them into a postcard and add a short note or voice.
+- Share a link through an existing messaging app.
+- A relative opens it whenever convenient, listens, turns it over, and can
+  print it for the fridge or a keepsake box.
+
+The emotional peak is a relative recognizing the sender in an ordinary detail:
+"I made your eggs this morning. They still weren't as good as yours."
+
+Make it feel like a small piece of home crossing a distance.
+
+2. PRODUCT BOUNDARIES AND PRIORITIES
+
+Build this first:
+- Capture or upload photos; add short captions; reorder and remove moments.
+- Restore an unfinished draft after refresh.
+- Assemble an attractive postcard from those actual moments.
+- Write an editable note and optionally record up to 60 seconds of voice.
+- Preview the front and back with a satisfying card flip.
+- Browse keepsakes as a tactile postcard cluster, with an accessible list option.
+- Offer a playful creator interface and a calm recipient interface.
+- Publish a durable, unlisted link when a backend is configured.
+- Share through the device share sheet, with a copy-link fallback.
+- Open the published card on another device without recipient signup.
+- Export a printable postcard PDF.
+- Keep a small collection of drafts and published postcards.
+- Include a clearly identified sample story for reliable demonstrations.
+
+After the complete core journey works, consider PNG export and a tiny "Send a
+little love back" acknowledgement. These are optional and must not delay the
+core loop.
+
+Defer automatic translation, translated speech in the sender's voice,
+AI-generated illustrations of personal photos, scheduled delivery, physical
+mail fulfillment, contact imports, subscriptions, and a native app-store build.
+
+The first version assembles real photos with original decorative illustrations.
+It must not pretend that photos have been AI-redrawn or that text has been
+translated. Original voice recording is part of the core; voice cloning is not.
+
+Sharing is user initiated. "They wake up to your day" describes asynchronous
+use, not an automatic messaging or scheduling integration.
+
+There is no public feed, follower count, streak, competitive stamp collection,
+mandatory daily reminder, or pressure to reply. One moment is enough.
+
+3. VISUAL DIRECTION: ONE BRAND, TWO EXPERIENCES
+
+The moodboard contains layered letters, paper scraps, botanical ephemera,
+postage stamps, handwritten notes, irregular snail spirals, colorful painted
+snails, Peach Pit lettering, and the earthy Pinefolk/Tierra references.
+
+Translate those qualities into a coherent product. Create original Snailpost
+assets rather than tracing the reference logos or reusing unlicensed artwork.
+
+The organizing idea is "a tiny postal service for everyday life."
+
+Shared brand:
+- Warm paper, generous margins, dark ink, tangible card edges.
+- One recognizable spiral snail mark that also works as a small favicon.
+- A lowercase wordmark with an organic, slightly imperfect personality.
+- A consistent postcard object, stamp system, and envelope language.
+- Gentle visual imperfections in artwork; precise alignment in the controls.
+
+Use this starting palette as design tokens, refining combinations after actual
+contrast checks:
+- Paper: #F6F1E7
+- Ink: #2B2925
+- Peach: #F2C2AE
+- Clay: #B54532
+- Moss: #3D513E
+- Marigold: #D4A24A
+- Postal blue: #2C4C9D
+
+Pastels are surfaces and accents. Keep functional text dark and legible.
+Avoid glass effects, neon gradients, dashboard widgets, and generic SaaS
+styling. Paper texture should be subtle and should never interfere with text.
+
+A. "Postcard Studio" — the creator experience
+
+This is the more playful, Peach Pit-inspired side: peach and butter-colored
+paper, rounded organic headlines, imperfect stamps, small doodles, and a few
+photo corners or pieces of tape. Imagine an evening at a bedroom desk.
+
+Use a licensed organic display face or an appropriate open-source substitute
+such as Fraunces, paired with a readable UI sans. Any handwriting face is for
+short decorative annotations only. Do not place essential instructions in
+difficult handwriting.
+
+The composition can feel handmade, while the navigation remains orderly.
+Do not rotate every panel or put a sticker on every control.
+
+B. "Easy Reading" — the recipient experience
+
+Take the quiet, earthy qualities of Pinefolk and Tierra: cream, moss, restrained
+clay, generous whitespace, and clear typography. Organic display type is an
+accent; instructions, dates, and messages use a highly readable face.
+
+Use approximately 18–20 px body text, comfortable line spacing, large labeled
+controls, and minimal navigation. Put the sender, the date, and the next action
+where they are immediately understandable.
+
+This should feel like opening a thoughtful letter. Never call it "elderly mode."
+
+Creators can choose a calmer interface. Recipients can increase text size and
+choose either appearance. Shared links default to Easy Reading. These are
+presentation choices over the same content, not separate apps or accounts.
+
+Original asset direction:
+- A simple snail with an envelope-shaped shell detail, readable at small sizes.
+- Four initial stamps: Breakfast Club, On My Way, Little Victories, and Home
+  Again. Each represents a moment category, not a reward or a streak.
+- A tiny sprig, sun, steam curl, and postal cancellation mark.
+- A quiet envelope illustration for the opening state.
+
+Prefer compact SVG assets for the simple original brand marks and decorative
+illustrations. Keep photos and postcard content separate from decoration.
+Record asset provenance and any font licenses.
+
+4. SCREEN-BY-SCREEN EXPERIENCE
+
+Use a working mobile layout around 390 px as the design baseline, but support
+320 px through desktop without horizontal overflow. On larger screens, give
+the creator a comfortable two-column workspace with a live card preview.
+Do not put the entire product inside a fake phone frame.
+
+A. First visit / Today's moments
+
+Open into the product, not a long marketing website.
+
+Show the Snailpost mark, a small date, a recipient chip, and:
+"What would you like to send home today?"
+
+Primary action: "Add a little moment."
+Secondary action: "Explore a sample postcard."
+
+Ask for a recipient display name or relationship when useful. No address book
+permission or street address is needed. Let someone start collecting before
+they create a sender account; explain any sign-in required to publish when
+they reach that step.
+
+A growing, gently fanned cluster of photo scraps shows today's moments. Use
+time labels such as "8:12 am" and short captions. A small envelope preview
+quietly fills as moments are added.
+
+Empty-state copy:
+"Nothing big has to happen. Breakfast counts."
+
+After at least one moment exists, show "Make today's postcard."
+Use three clear destinations: Today, Keepsakes, and Settings.
+
+B. Add a moment
+
+Support taking a photo when the browser allows it and choosing from the photo
+library. Provide an optional caption prompt:
+"Tell them the bit the photo can't."
+
+Allow review, replacement, removal, and reordering. Include tap-based move
+controls so drag gestures are optional. Show upload or local-save progress
+honestly. Handle large photos and unsupported file formats with useful recovery.
+
+Limit each card to six moments to keep the story short. A single photo must
+still create an intentional, beautiful card.
+
+Do not require continuous camera access, background recording, or location
+tracking. Place names are optional and manually entered.
+
+C. Compose the postcard
+
+Use a clear three-step flow: Moments → Your note → Preview.
+
+Offer one polished default layout with restrained alternatives only if needed.
+The user should not have to become a graphic designer.
+
+For one photo, make an intimate hero image. For two to four, use a deliberate
+collage with breathing room. For five or six, use a clean sequence. Preserve
+user-defined ordering and use that same ordering in the reader and exports.
+
+A short title and note are editable. Start with the user's own captions where
+possible. A deterministic layout engine is sufficient for this version:
+arrange content, add decorative marks, and preserve the user's wording.
+Do not invent what happened, emotions, relationships, or quotes.
+
+Keep the main postcard note short, around 280 characters. Preserve longer
+supporting captions and any transcript in the accessible reading view.
+
+Optional voice:
+"Tell it in your voice."
+Offer Record, Stop, Listen back, Record again, and Remove. Show elapsed time.
+If the microphone is unavailable or permission is denied, keep the written
+postcard fully usable and offer an audio-file upload where supported.
+
+Always include readable written content. If an actual transcription integration
+is configured, show its result for correction before publishing. Otherwise
+offer a manually entered transcript or clearly labeled written summary.
+Never label a fabricated or approximate summary as a verbatim transcript.
+
+Finish by choosing one stamp. The default should already look good.
+
+D. Preview and the signature card flip
+
+This is the signature interaction. Inspect the exact Ramp sketchbook reference:
+https://x.com/jeanxcrj/status/2064835647152787800
+
+Translate its intended sketchbook tactility into a convincing, reversible,
+two-sided postcard. If a suitable source component exists in the repository,
+inspect it before writing a replacement. Do not reduce this to an unrelated
+stock hover-flip just because that is easier to implement.
+
+Proposed adaptation, to refine after viewing the reference: the postcard lifts
+slightly from the desk, turns with a controlled edge-led pivot and a traveling
+shadow, then settles. Let depth, edge thickness, and easing communicate paper.
+Use restrained flex only if it can be implemented cleanly; a heavyweight 3D
+engine is not required. The object stays a postcard, not a bound notebook.
+
+Front:
+- The illustrated photo composition.
+- The postcard title and date.
+- A small sender signature.
+- One restrained decorative detail.
+
+Back:
+- "Dear [recipient]," and the short message.
+- "Love, [sender]."
+- The selected stamp, a postal divider, and a postmark.
+- Optional city-to-city text if the user supplied it.
+
+Use a landscape postcard proportion, roughly 3:2, with paper-colored edges
+and a soft directional shadow. Avoid shrinking text to force everything into
+the visual card: show the full note and captions below when necessary.
+
+The flip should feel like turning cardstock:
+- Approximately 550–700 ms for a deliberate half turn.
+- Perspective and a restrained change of shadow during the turn.
+- Correct front and back orientation with no mirrored text.
+- No continuous spinning, automatic flipping, or movement while reading.
+
+Provide persistent, labeled controls: "Read the back" and "See the front."
+A direct tap can be an additional affordance; hover and swipe must never be
+the only way to operate it. Keyboard activation must work.
+
+Use proper hidden-face semantics and focus handling. Do not leave hidden
+buttons in the tab order. Avoid wrapping all interactive card content inside
+one large button.
+
+Honor reduced-motion settings by switching faces instantly or with a brief
+fade. Keep the layout stable, including when content or text size changes.
+Provide a "Read as a letter" view with all content in normal document flow.
+
+Main action: "Ready to share."
+Secondary action: "Keep editing."
+
+E. Share
+
+Explain the two ways to keep a postcard:
+- "Send a link" for photos, note, and voice.
+- "Print a keepsake" for a physical card.
+
+Publish a snapshot after the sender reviews it, then create its durable link.
+A later draft edit must not silently alter something already shared; require
+an explicit update, or create a new postcard version.
+
+Use the native share sheet when available. Offer "Copy link" as a visible
+fallback. Support the user's existing messaging app through the operating
+system rather than requiring a new conversation inside Snailpost.
+
+Do not claim automatic delivery to WhatsApp, Messages, WeChat, or any other
+app. Share-sheet success does not prove the recipient received or opened it.
+Use truthful states such as "Link ready" and "Link copied."
+
+Offer a plain-language sharing note:
+"Anyone with this link can open your postcard."
+Let the sender disable the link later.
+
+Treat canceling the share sheet as normal, not a red error state.
+Keep unsent content intact if publishing or upload fails.
+
+F. Recipient opening
+
+The shared page must work in a fresh, unauthenticated browser on another
+device. No app installation, signup wall, or creator navigation.
+
+Start with:
+"A little of [sender]'s day, for you."
+Show the date and one prominent "Open postcard" button.
+
+Use one short envelope-opening transition, then let the story breathe.
+A repeat visit should not force the recipient through a lengthy animation.
+
+Offer:
+- "Play [sender]'s voice" when an audio recording exists.
+- "Read the back" / "See the front."
+- "Read as a letter."
+- A simple larger-text setting.
+- "Print this postcard."
+
+Never autoplay audio. Include pause, replay, duration, and a readable transcript
+or clearly labeled written summary. If audio cannot play, explain that gently
+and keep the photos and message available.
+
+The letter view should present the moments in order, with captions and the
+note, as the accessible alternative to the compact card. Do not hide the story
+behind animation or tiny artwork.
+
+G. Keepsakes
+
+A calm, small collection of cards organized by date and recipient. Distinguish
+drafts from published cards. Avoid "delivered" or "read" labels without a real
+delivery or receipt integration.
+
+Support reopening, sharing again, downloading, disabling a published link,
+and deleting with an appropriate confirmation. Keep the visual metaphor of
+a keepsake box without making navigation obscure.
+
+H. The postcard cluster — a handful of days
+
+Use the ticket-card project as the explicit interaction reference:
+https://github.com/ela1ne0/ticket-card
+
+Proposed Snailpost cluster behavior:
+- Resting: three to five visible postcard edges form a loose, shallow fan on
+  warm paper. Small deterministic rotations, around -6 to +6 degrees, give
+  personality without making titles hard to read. Group by month or recipient.
+- Browse: selecting "Browse postcards" spreads the group enough to choose a
+  card. Desktop hover may gently lift a visible card; touch and keyboard
+  selection must provide the same essential access.
+- Select: a chosen postcard rises and moves into a centered reading position.
+  The other cards recede slightly so the selected story becomes the focus.
+- Read: the selected postcard supports the Ramp-inspired front/back turn.
+  Opening a card and turning it over are distinct actions.
+- Return: "Back to keepsakes" returns to the same group, scroll position,
+  and selected-card context, with focus restored to the triggering control.
+
+The intended visual sequence is: a handful of days → choose one → lift it
+out → turn it over → put it back. This makes the archive feel like a set of
+objects someone kept, and connects the cluster directly to storytelling.
+
+On phones, keep the stack inside the viewport. Provide a visible title/date
+and Previous/Next controls or a clear accessible list so a narrow exposed
+card sliver is never someone's only target. Limit rendered animated cards;
+do not build an infinite physics playground. Keep rotations stable on rerender.
+
+Do not use the cluster for form fields, settings, or the default recipient
+page. Easy Reading opens one card at a time and defaults to the straightforward
+list if browsing a collection. Keep "Next postcard" distinct from "Read the
+back" so navigating a collection cannot be confused with turning one card.
+
+Implement explicit states for resting, browsing, selected-front, selected-back,
+and returning. Animate transforms and opacity where possible. Handle rapid
+taps, interrupted transitions, resizing, and stale selections without ghost
+cards, duplicate focus targets, or a stuck overlay. If a modal is used, give
+it correct dialog semantics, Escape behavior, and focus restoration.
+
+Suggested motion starting points: 180–250 ms for a small lift, 300–450 ms for
+selection/return, and 550–700 ms for the postcard turn. These are design
+proposals, not measurements from the references. Reduced-motion mode keeps
+all states and controls with immediate changes or brief fades.
+
+5. DEMO STORY AND MICROCOPY
+
+Use one clearly labeled fictional demo:
+Alex, a student away from home, sends a postcard to Grandma.
+
+Four moments:
+1. Breakfast — "Tried your eggs. Still not as good as yours."
+2. The walk to class — "The leaves finally started turning."
+3. Practice — "Stayed a little late. Felt good to be outside."
+4. Dinner — "We ate together. I saved you a story."
+
+Suggested card title: "Four little things from Thursday."
+Suggested note:
+"Nothing big happened today. I just wanted you to be in it."
+
+Use locally bundled, licensed sample images or original assets with coherent
+color and lighting. Do not rely on fragile remote image URLs. Clearly mark
+sample content and any sample narration; do not imply it is a real family
+or a real recording unless it is.
+
+Useful copy:
+- Empty day: "A small thing is enough."
+- Saved draft: "Saved for later."
+- Composition: "Putting your day together."
+- Voice: "They know this voice."
+- Ready state: "A little of your day, ready to go."
+- Reader closing: "Keep this little piece of today."
+- Audio failure: "The voice note isn't loading. You can still read the postcard."
+- Disabled link: "This postcard is no longer available."
+
+Keep processing language honest and tied to real work. Do not add fake waits
+to make the app seem more intelligent. Do not fill every line with snail puns.
+
+6. IMPLEMENTATION AND DATA INTEGRITY
+
+If starting from scratch, use Next.js with TypeScript, a token-based styling
+system such as Tailwind/CSS variables, and lightweight motion. Target Vercel.
+Use compatible, currently supported package versions, a committed lockfile,
+and documented setup. If an existing suitable stack is present, prefer
+extending it over unnecessary replacement.
+
+Suggested routes; adapt them to repository conventions:
+- /today
+- /postcards/[id]/edit
+- /postcards/[id]/preview
+- /keepsakes
+- /p/[token]
+- /demo
+
+Use reusable components for the postcard faces, accessible card flip, moment
+capture, voice recorder/player, stamps, theme controls, share actions, and
+print layout, plus a reusable PostcardCluster with explicit selection state.
+Use one postcard content model across creator, recipient,
+letter view, and export so these representations do not drift apart.
+
+Suggested entities:
+- Recipient: display name and optional place; language preference can be
+  added when translation exists.
+- Moment: id, order, photo reference, caption, and captured timestamp.
+- Draft: owner/local id, recipient, moments, title, note, appearance, audio,
+  written transcript/summary status, and save state.
+- PublishedPostcard: an immutable content snapshot, version, owner, creation
+  date, asset references, and active/revoked state.
+- ShareLink: a cryptographically random token, its protected server-side
+  representation, the postcard version, and revocation state.
+
+For a real shared link, use durable server-side data and media storage.
+Supabase Auth, Postgres, and private Storage are a reasonable default if
+those services are available. Existing equivalent infrastructure is fine.
+Do not pretend localStorage, in-memory objects, or the Vercel deployment
+filesystem can make personal postcards available on a second device.
+
+Store local draft media in IndexedDB or another appropriate local persistence
+layer. Do not put large base64 photo blobs in localStorage. Preserve drafts
+through refresh and migration into an authenticated sender account.
+
+Use minimal sender authentication for real publishing and ownership. Recipients
+remain unauthenticated link viewers. Backend credentials stay on the server.
+Enforce ownership for creator reads, edits, uploads, deletes, and link controls;
+another sender must not be able to access private drafts or modify a card.
+
+Use private media storage. Validate an active share token before granting
+recipient access to a published snapshot and its media. Do not expose bucket
+listing or use public media URLs as a shortcut. Link tokens must be high
+entropy, not sequential ids. Keep tokens and private content out of analytics
+and error logs.
+
+Use appropriate no-store behavior on private/shared content, noindex headers,
+a no-referrer policy on bearer-link pages, and a generic link preview that
+does not reveal private photos. Account for the expiry window of any signed
+media URLs when documenting what link revocation guarantees.
+
+Validate image/audio size, type, and authorization on the server as well as
+the client. Handle image orientation, resize sensibly, remove unnecessary
+location metadata from processed images, and clean up abandoned uploads.
+Support common phone formats where practical; explicitly handle unsupported
+HEIC instead of accepting a file that later disappears.
+
+Use MediaRecorder feature detection and supported MIME-type negotiation.
+Stop media tracks on completion or cancellation. Release temporary object
+URLs. Do not assume one recording codec works on every phone or browser.
+
+Save dates with a clear time zone; display the sender's day consistently.
+Optional destination time-zone information must not imply scheduled delivery.
+
+Implement idempotent publishing so a double tap or network retry does not
+create duplicate cards. Preserve a successful publication if sharing is
+canceled. Track honest states such as draft, saving, ready, publishing,
+published, and failed.
+
+If backend credentials are unavailable, build the complete local creation,
+preview, recording, and export experience plus a bundled public sample.
+Label the sample/local preview accurately. Do not create a fake share URL
+for a personal card. Prepare the schema, policies, environment-variable
+template, and integration steps, and mark cross-device publishing BLOCKED
+until it is genuinely configured and tested.
+
+The interface should explain a user's next action in plain language; keep
+provider names and environment setup in developer documentation.
+
+7. PRINTING AND THE PHYSICAL KEEPSAKE
+
+Printing is a core expression of the product, not a decorative extra.
+
+Provide a downloadable two-page PDF with one 6 × 4 inch landscape face per
+page: front on page one, back on page two. Use a clear safe margin, readable
+type, and embedded images/fonts. At 300 dpi, a full-face raster export would
+be 1800 × 1200 px; retain vector type where practical.
+
+Keep the PDF bound to the same reviewed postcard snapshot. Do not include
+browser controls, 3D transforms, shadows outside the card, or clipped text.
+Use a static print rendering path rather than a screenshot of the animated UI.
+
+Include concise instructions to print at actual size and check the printer's
+duplex orientation. Do not promise that every home printer will align both
+faces perfectly.
+
+For a published card with voice, offer an optional QR code and short caption:
+"Scan to hear my day." Explain that the QR provides access to the same
+unlisted postcard. Generate it from the canonical public share URL and verify
+that it decodes to that exact URL. Local-only drafts must not print unusable
+localhost or blob URLs.
+
+If the source photo resolution is too low, give a gentle quality notice.
+If long content cannot fit, use a clearly indicated continuation page rather
+than silently cropping or shrinking to illegible type; the normal short
+postcard should remain two pages.
+
+Provide a working download and, where practical, a browser print fallback.
+This version creates printable files; it does not order or mail physical cards.
+
+8. ACCESSIBILITY, RESPONSIVENESS, AND FAILURE STATES
+
+Treat these as part of the design:
+- At least WCAG AA contrast for functional content.
+- Approximately 44 px minimum interactive targets; aim for 48 px in Easy Reading.
+- Visible focus, semantic buttons, labels, headings, and usable tab order.
+- Screen-reader access to photos, captions, notes, audio controls, and status.
+- No information conveyed only by color, sound, animation, or icon shape.
+- Usable text enlargement and reflow at narrow widths.
+- Respect reduced motion and never require a gesture.
+- Comfortable safe-area spacing and an on-screen keyboard that does not
+  cover essential fields or buttons.
+
+Include deliberate states for empty content, loading, local-save failure,
+upload interruption, microphone denial, unsupported recording, failed audio,
+offline use, missing backend configuration, invalid/revoked links, canceled
+sharing, and failed publication.
+
+Use real progress where measurable. Preserve the user's work on recoverable
+errors. Avoid destructive blanket cache-clearing as a recovery technique.
+
+9. TEST THE WORK — DO NOT ONLY WRITE TEST FILES
+
+Run the application and execute the relevant checks. Fix failures and rerun
+the affected tests. Do not say "tested" because the test file exists.
+
+Use the repository's package manager. Provide and run appropriate commands
+for lint, type checking, meaningful unit/integration tests, a production build,
+and Playwright end-to-end tests. Record the exact commands and results.
+
+A successful build alone is insufficient. Cover the behaviors that protect
+the experience:
+
+Creation and persistence:
+- Add four images, caption them, reorder and remove one, refresh, and verify
+  that the remaining media, note, and order survive.
+- Build an intentional card from one image.
+- Validate corrupt, unsupported, and oversized uploads with recoverable errors.
+- Deny microphone access and verify the text-only flow remains usable.
+
+Postcard and accessibility:
+- Flip front/back with pointer and keyboard; verify hidden-face focus behavior.
+- Verify reduced-motion behavior and the linear letter view.
+- Select, turn, and return cards from the cluster on touch and keyboard; test
+  rapid repeated actions, resize, focus restoration, and the list alternative.
+- Verify that browsing to the next postcard never turns the current one over,
+  and that changing faces never unexpectedly changes the selected postcard.
+- Check both appearances at narrow phone, standard phone, and desktop widths,
+  including enlarged text.
+- Run an automated accessibility scan and manually inspect the essential
+  keyboard and reading flows. Do not treat an automated scan as complete proof.
+
+Voice:
+- Test record/stop/replay/remove states and actual saved audio where the
+  environment supports recording.
+- Use deterministic media fixtures for automated tests, clearly marked as
+  fixtures. Record actual-device microphone and codec checks separately.
+- Verify failed audio does not hide the written story.
+
+Publication and permissions:
+- In a configured test backend, publish a real card in browser context A.
+- Open the resulting link in fresh context B with no session, cookies, local
+  draft data, or mocked publication/media endpoints. Verify actual images,
+  note, order, and audio load.
+- Verify refresh of that recipient URL still works.
+- Verify another sender cannot edit, delete, or read private draft data.
+- Revoke the link and verify future access follows the documented policy.
+- Double-submit publication and verify only one intended version is produced.
+- Verify editing a draft does not silently change a published snapshot.
+
+Sharing and print:
+- Exercise native-share availability, unsupported browser fallback, clipboard
+  success/failure, and user cancellation.
+- Do not interpret share-sheet completion as delivery.
+- Export and open the PDF; inspect both faces, page size, fonts, and image
+  presence. Verify QR target and text overflow behavior when relevant.
+- Confirm there are no blank pages, mirrored text, clipped notes, or controls
+  accidentally embedded in the export.
+
+Run browser coverage for Chromium and WebKit where available. Playwright
+mobile emulation is useful but is not a substitute for testing a real iPhone
+or Android share sheet, microphone, and in-app messaging browser. Record which
+checks are automated, which were manual, and which remain unverified.
+
+Use a dedicated test dataset and avoid sending messages to real contacts.
+Mock external delivery boundaries as needed, but keep the actual storage and
+fresh-recipient publication test real before declaring sharing complete.
+
+Capture a small set of visual checks: Today, Compose, card front/back, Reader,
+the resting and selected cluster, and print output. Inspect them and correct
+overflow, weak contrast, awkward
+cropping, or misaligned decoration. Keep evidence and a concise issue list.
+
+If dependencies, credentials, browsers, or hardware prevent a test, record
+BLOCKED or NOT RUN with the exact reason. Never turn a skipped test into a pass.
+
+10. GOOGLE DOCS BUILD LOG
+
+Create a Google Doc titled:
+"Snailpost — Build Log & Design Decisions"
+
+Use an available authenticated Google Docs integration or authorized API
+access. Create the actual document, populate it, and return its real URL.
+Keep it private by default; do not invite collaborators or change sharing
+permissions without a request.
+
+Save the document id in project configuration suitable for documentation,
+then update that same document after each meaningful completed milestone.
+Do not create a new document on every run. Never invent a Google Docs URL.
+
+Maintain a local, versioned mirror at docs/build-log.md so the record remains
+useful when the integration is unavailable. If Google Docs access is missing,
+prepare the complete log locally, continue the build, and state precisely what
+connection is needed. The online document remains BLOCKED until it exists.
+
+The log must distinguish intended work from working behavior. Include:
+
+A. Current build
+- Last updated date and time.
+- Commit or build identifier, if available.
+- Local start instructions and verified preview/deployment URL, if available.
+- One-sentence status of the complete sender-to-recipient loop.
+
+B. Capability inventory
+For each feature:
+Feature | User-facing behavior | Route/component | Status | Evidence | Remaining work
+
+Use consistent statuses:
+PLANNED / IN PROGRESS / IMPLEMENTED, UNVERIFIED / VERIFIED / BLOCKED.
+Indicate whether a capability uses real services, local storage, or demo fixtures.
+
+C. Design decisions
+Decision | Alternatives considered | Why chosen | Evidence or assumption
+
+Include at least:
+- One daily postcard versus a social feed.
+- Playful creation versus calm reading.
+- Authentic photos with illustration versus AI-redrawn memories.
+- Optional voice and always-readable text.
+- Link access versus recipient account creation.
+- The physical keepsake and QR bridge.
+- The tradeoff between tactile animation and accessibility.
+- Postcard clusters versus a conventional grid, including discoverability on
+  phones and the simpler recipient default.
+- Which behaviors were observed in each supplied reference, which were
+  independently proposed, and what source/code was reused under what license.
+
+D. Test evidence
+Date | Build | Command or manual procedure | Environment | Result/count |
+Failure or limitation | Evidence location
+
+List actual tests executed, failures repaired, reruns, and unverified items.
+Never invent counts, measurements, screenshots, research findings, or users.
+
+E. What was created
+List relevant screens, components, data models/migrations, original assets,
+export functionality, test coverage, and setup documentation. Describe what
+these enable rather than dumping every generated file.
+
+F. Known limitations and next steps
+Keep translation, translated voice, automated scheduling, and physical mailing
+clearly separate from the working first version. Note any unresolved backend
+or device-testing requirement.
+
+11. COMPETITION STORY AND DESIGN REASONING
+
+Alongside the code, prepare docs/demo-script.md for a 6:45 presentation:
+
+0:00–0:40 — The human problem: "I talk to my family, but they still miss the
+ordinary parts of my life."
+
+0:40–1:10 — The specific audience and job to be done. Distinguish the concept
+from a photo album or another messaging app.
+
+1:10–3:10 — Show the complete ritual: collect moments, compose, add voice,
+stamp, preview, publish, and share.
+
+3:10–4:05 — Open the link as the recipient. Show the calm layout, card flip,
+voice, readable letter view, and printable keepsake. Briefly return a card to
+its cluster to show the relationship between a day and a collection.
+
+4:05–5:20 — Explain two or three difficult design decisions. Show actual
+alternatives, prototypes, or revisions produced during the work.
+
+5:20–6:10 — Demonstrate what works, how it was tested, and the honest limits
+of the current build.
+
+6:10–6:45 — Close on the emotional payoff and the next validation step.
+"A day that felt too ordinary to share became something worth keeping."
+
+Document actual exploration as it happens. Compare at least two plausible
+card compositions and two recipient entry approaches before choosing.
+Do not fabricate interviews, usability results, iterations, or performance
+numbers to improve the case study.
+
+Propose, but do not claim to have completed, a small pilot with several
+student–relative pairs. Useful questions:
+- Can a sender create a postcard without help?
+- Can a recipient open, listen, and read without coaching?
+- Does the postcard communicate a more coherent day than scattered photos?
+- Does either person want to keep it or receive another?
+
+Record these as validation questions, not established outcomes.
+
+12. BUILD ORDER AND DEFINITION OF DONE
+
+Build in this sequence:
+1. Inspect the repository and references; state the product interpretation and
+   a short implementation plan.
+2. Establish tokens, original brand marks, the postcard object, a realistic
+   sample composition, and a small interactive cluster/flip prototype informed
+   by the two supplied references.
+3. Complete local capture, draft persistence, note, voice, composition, and
+   preview as one working vertical slice.
+4. Connect durable publishing, ownership, recipient access, and link controls
+   when credentials are available.
+5. Finish sharing, the readable recipient view, and print export.
+6. Run functional, permission, accessibility, browser, and visual checks.
+7. Refine craft, update the Google Doc/local log, and prepare the demo script.
+8. Prepare a Vercel preview deployment using authorized access. If access is
+   unavailable, provide precise deployment instructions and the remaining
+   environment setup. Do not claim the app is live without a verified URL.
+
+A successful handoff contains:
+- Runnable code and documented setup.
+- A complete, beautiful core journey with real persistence.
+- A working cross-device postcard link, or an explicit blocked status with
+  the local/sample capabilities accurately described.
+- Accessible front/back and letter views.
+- The reference-informed cluster → select → flip → return interaction, with
+  a calm, accessible alternative.
+- An inspected printable postcard.
+- Executed test results with clear limitations.
+- The actual Google Docs log URL, or a complete local fallback and its blocker.
+- A concise design-decision record and a usable competition demo script.
+
+Finish by explaining what was built, what passed, what remains blocked, how
+to run it, and where to find the build log and preview.
+
+Start now. Make the first postcard feel like someone cared enough to send it.
+
+TECHNICAL REFERENCE LINKS
+
+Consult current primary documentation during implementation; resolve
+repository-version details against the installed packages.
+
+- Next.js on Vercel:
+  https://vercel.com/docs/frameworks/full-stack/nextjs
+- Browser share behavior and availability:
+  https://developer.mozilla.org/en-US/docs/Web/API/Navigator/share
+  https://developer.mozilla.org/en-US/docs/Web/API/Navigator/canShare
+- Recording format detection:
+  https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder/isTypeSupported_static
+- Playwright device emulation and browser projects:
+  https://playwright.dev/docs/emulation
+  https://playwright.dev/docs/test-projects
+- Supabase Storage access control:
+  https://supabase.com/docs/guides/storage/security/access-control
+- Creating Google Docs:
+  https://developers.google.com/workspace/docs/api/how-tos/documents
