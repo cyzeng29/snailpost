@@ -176,9 +176,10 @@ export function RecipientView({ content, shareUrl }: { content: PostcardContent;
               </div>
             </section>
 
-            <p className="display mt-12 flex items-center justify-center gap-2 text-center text-[1.25rem]">
-              <Spiral className="h-6 w-6" /> Keep this little piece of today.
-            </p>
+            <div className="mt-12 flex flex-col items-center gap-2 text-center">
+              <Spiral className="h-7 w-7" />
+              <p className="display m-0 text-[1.25rem] [text-wrap:balance]">Keep this little piece of today.</p>
+            </div>
           </motion.main>
         )}
       </AnimatePresence>

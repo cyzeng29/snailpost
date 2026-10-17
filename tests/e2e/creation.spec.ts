@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { addMoments, CAPTIONS, captionsInOrder, SAMPLE_PHOTOS } from "./helpers";
+import { addMoments, CAPTIONS, captionsInOrder, expectNoHorizontalOverflow, SAMPLE_PHOTOS } from "./helpers";
 
 test.describe("collecting moments", () => {
   test("add four, reorder, remove one, refresh: media, captions, order and note survive", async ({ page }) => {
@@ -85,6 +85,21 @@ test.describe("collecting moments", () => {
     await expect(page.getByRole("button", { name: "Add a little moment" })).toBeDisabled();
     await expect(page.getByText("Six is the most a postcard holds")).toBeVisible();
   });
+});
+
+test("compose and preview reflow at 320px and with larger text", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 700 });
+  await page.addInitScript(() => localStorage.setItem("snailpost.appearance", JSON.stringify({ textSize: "large" })));
+  await page.goto("/today");
+  await addMoments(page, SAMPLE_PHOTOS.slice(0, 2));
+  await page.getByRole("button", { name: "Make today's postcard" }).click();
+  await expectNoHorizontalOverflow(page);
+  await page.getByRole("button", { name: "Next: your note" }).click();
+  await page.getByLabel("Message").fill("A note.");
+  await expectNoHorizontalOverflow(page);
+  await page.getByRole("button", { name: "Preview the postcard" }).click();
+  await expect(page.getByRole("heading", { name: "Preview" })).toBeVisible();
+  await expectNoHorizontalOverflow(page);
 });
 
 test.describe("voice", () => {

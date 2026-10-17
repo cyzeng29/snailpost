@@ -12,7 +12,7 @@ export function Steps({ current, draftId, onSelect }: { current: StepKey; draftI
   const idx = STEPS.findIndex((s) => s.key === current);
   return (
     <nav aria-label="Postcard steps">
-      <ol className="m-0 flex list-none items-center gap-1 p-0 text-[0.95rem]">
+      <ol className="m-0 flex list-none flex-wrap items-center gap-x-1 gap-y-0 p-0 text-[0.95rem]">
         {STEPS.map((s, i) => {
           const isCurrent = s.key === current;
           const inner = (
@@ -28,7 +28,7 @@ export function Steps({ current, draftId, onSelect }: { current: StepKey; draftI
               <span className={isCurrent ? "font-bold" : ""}>{s.label}</span>
             </>
           );
-          const cls = "inline-flex min-h-[var(--target)] items-center gap-1.5 rounded-full px-2 no-underline";
+          const cls = "inline-flex min-h-[var(--target)] items-center gap-1.5 whitespace-nowrap rounded-full px-1.5 no-underline";
           return (
             <li key={s.key} className="flex items-center gap-1">
               {i > 0 && <span aria-hidden="true" className="text-ink/40">→</span>}
