@@ -1,26 +1,224 @@
 @import "tailwindcss";
 
+/*
+  Snailpost tokens. Contrast checked (WCAG 2.1, see docs/build-log.md):
+  ink/paper 12.9, moss/paper 7.63, blue/paper 7.1, clay/paper 4.83,
+  ink/peach 9.06. Clay on peach fails (3.39), so text on peach is always ink.
+*/
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --paper: #f6f1e7;
+  --paper-deep: #ece4d4;
+  --cream: #fbf8f1;
+  --ink: #2b2925;
+  --ink-soft: #5c564d;
+  --peach: #f2c2ae;
+  --butter: #f7e7b4;
+  --clay: #b54532;
+  --clay-deep: #9a3826;
+  --moss: #3d513e;
+  --moss-soft: #dfe5d6;
+  --marigold: #d4a24a;
+  --postal-blue: #2c4c9d;
+
+  /* role tokens: Postcard Studio (creator) is the default appearance */
+  --surface: var(--paper);
+  --surface-raised: var(--cream);
+  --surface-accent: var(--peach);
+  --text: var(--ink);
+  --text-soft: var(--ink-soft);
+  --action: var(--clay);
+  --action-text: var(--paper);
+  --action-hover: var(--clay-deep);
+  --focus: var(--postal-blue);
+  --line: rgb(43 41 37 / 0.16);
+
+  --radius-card: 6px;
+  --shadow-card: 0 1px 1px rgb(43 41 37 / 0.08), 0 8px 24px -8px rgb(43 41 37 / 0.28);
+  --target: 44px;
+  --font-size-base: 16px;
+}
+
+/* Easy Reading: calm, earthy, larger text and targets. */
+[data-appearance="reading"] {
+  --surface: var(--cream);
+  --surface-raised: #ffffff;
+  --surface-accent: var(--moss-soft);
+  --action: var(--moss);
+  --action-text: var(--cream);
+  --action-hover: #2f3f30;
+  --target: 48px;
+  --font-size-base: 19px;
+}
+
+[data-text-size="large"] {
+  --font-size-base: 22px;
+}
+[data-appearance="reading"][data-text-size="large"] {
+  --font-size-base: 23px;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-paper: var(--paper);
+  --color-paper-deep: var(--paper-deep);
+  --color-cream: var(--cream);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-peach: var(--peach);
+  --color-butter: var(--butter);
+  --color-clay: var(--clay);
+  --color-clay-deep: var(--clay-deep);
+  --color-moss: var(--moss);
+  --color-moss-soft: var(--moss-soft);
+  --color-marigold: var(--marigold);
+  --color-postal: var(--postal-blue);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-accent: var(--surface-accent);
+  --color-text: var(--text);
+  --color-text-soft: var(--text-soft);
+  --color-action: var(--action);
+  --color-action-text: var(--action-text);
+  --color-line: var(--line);
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-sans: var(--font-atkinson), system-ui, sans-serif;
+  --font-hand: var(--font-caveat), cursive;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  font-size: var(--font-size-base);
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--surface);
+  color: var(--text);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+}
+
+/* Subtle paper grain: an SVG noise tile at very low opacity, behind content. */
+.paper-grain {
+  background-image: url("/brand/grain.svg");
+  background-size: 240px 240px;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.display {
+  font-family: var(--font-display);
+  font-variation-settings: "SOFT" 100, "WONK" 1;
+  letter-spacing: -0.01em;
+}
+
+/* Buttons: precise controls, even when artwork is imperfect. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: var(--target);
+  padding: 0.6rem 1.25rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1.2;
+  text-align: center;
+  transition: background-color 150ms, transform 150ms, box-shadow 150ms;
+  cursor: pointer;
+  text-decoration: none;
+}
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.btn-primary {
+  background: var(--action);
+  color: var(--action-text);
+  box-shadow: 0 2px 0 rgb(43 41 37 / 0.35);
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--action-hover);
+}
+.btn-primary:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 0 1px 0 rgb(43 41 37 / 0.35);
+}
+.btn-secondary {
+  background: transparent;
+  color: var(--text);
+  border: 2px solid var(--text);
+}
+.btn-secondary:hover:not(:disabled) {
+  background: rgb(43 41 37 / 0.06);
+}
+.btn-quiet {
+  background: transparent;
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding-inline: 0.5rem;
+}
+.btn-icon {
+  min-width: var(--target);
+  padding: 0.5rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--line);
+  background: var(--surface-raised);
+}
+
+.field {
+  width: 100%;
+  min-height: var(--target);
+  padding: 0.65rem 0.85rem;
+  border: 1.5px solid rgb(43 41 37 / 0.35);
+  border-radius: 10px;
+  background: var(--surface-raised);
+  color: var(--text);
+  font: inherit;
+}
+.field:focus-visible {
+  outline-offset: 1px;
+}
+
+.sr-only-focusable:not(:focus):not(:focus-within) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Postcard faces size their type to the card, so the composition is identical at any width. */
+.postcard {
+  container-type: inline-size;
+  aspect-ratio: 3 / 2;
+  border-radius: var(--radius-card);
+  background: var(--cream);
+  color: var(--ink);
+  overflow: hidden;
+  position: relative;
+}
+
+.safe-bottom {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
 }
