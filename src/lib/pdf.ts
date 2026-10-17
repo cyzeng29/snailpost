@@ -194,7 +194,8 @@ export async function buildPostcardPdf(
       "AtkinsonHyperlegible-Regular.ttf",
       "AtkinsonHyperlegible-Bold.ttf",
       "Caveat.ttf",
-    ].map(async (f) => doc.embedFont(await assets.fetchBytes(`${base}/${f}`), { subset: true })),
+    // Caveat is a variable font; fontkit's subsetter drops its glyphs, so it is embedded whole.
+    ].map(async (f) => doc.embedFont(await assets.fetchBytes(`${base}/${f}`), { subset: !f.startsWith("Caveat") })),
   );
 
   const report: PdfReport = { pageCount: 2, continuation: false, lowResolution: [] };

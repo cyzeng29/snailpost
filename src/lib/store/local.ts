@@ -6,7 +6,9 @@ import { emptyDraft, newId, type Draft, type PostcardContent, type Snapshot } fr
 
 interface SnailDB extends DBSchema {
   drafts: { key: string; value: Draft; indexes: { byUpdated: string } };
-  blobs: { key: string; value: { id: string; blob: Blob; createdAt: string } };
+  // Bytes are stored as an ArrayBuffer, not a Blob: WebKit rejects Blobs in
+  // IndexedDB in ephemeral sessions (e.g. Safari private browsing).
+  blobs: { key: string; value: { id: string; data: ArrayBuffer; type: string; createdAt: string } };
   snapshots: { key: string; value: Snapshot; indexes: { byDraft: string } };
   meta: { key: string; value: { key: string; value: string } };
 }
@@ -50,12 +52,14 @@ async function setMeta(key: string, value: string | null) {
 
 export async function putBlob(blob: Blob) {
   const id = newId("b_");
-  await (await db()).put("blobs", { id, blob, createdAt: new Date().toISOString() });
+  const data = await blob.arrayBuffer();
+  await (await db()).put("blobs", { id, data, type: blob.type, createdAt: new Date().toISOString() });
   return id;
 }
 
 export async function getBlob(id: string) {
-  return (await (await db()).get("blobs", id))?.blob;
+  const rec = await (await db()).get("blobs", id);
+  return rec ? new Blob([rec.data], { type: rec.type }) : undefined;
 }
 
 /** Delete blobs no draft or snapshot references any more (abandoned uploads, replaced photos). */

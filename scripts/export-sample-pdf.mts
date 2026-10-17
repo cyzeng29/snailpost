@@ -1,5 +1,5 @@
 // Exports the sample postcard PDF and one PNG per page (macOS `sips`) for visual inspection.
-// Usage: node scripts/export-sample-pdf.mts <outDir> [shareUrl]
+// Usage: npx tsx scripts/export-sample-pdf.mts <outDir> [shareUrl]
 import { execFileSync } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";

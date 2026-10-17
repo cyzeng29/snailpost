@@ -30,6 +30,17 @@ async function inspect(bytes: Uint8Array) {
   return { pages, images, fonts: [...fonts] };
 }
 
+async function embeddedFontBytes(bytes: Uint8Array, name: string) {
+  const doc = await PDFDocument.load(bytes);
+  for (const [, obj] of doc.context.enumerateIndirectObjects()) {
+    if (!(obj instanceof PDFDict) || obj.get(PDFName.of("Type")) !== PDFName.of("FontDescriptor")) continue;
+    if (!String(obj.get(PDFName.of("FontName"))).includes(name)) continue;
+    const file = doc.context.lookup(obj.get(PDFName.of("FontFile2")));
+    if (file instanceof PDFRawStream) return file.contents.length;
+  }
+  return 0;
+}
+
 describe("printable postcard PDF", () => {
   it("is two 6 × 4 in landscape pages with embedded fonts and every photo", async () => {
     const { bytes, report } = await buildPostcardPdf(SAMPLE_POSTCARD, assets);
@@ -46,6 +57,9 @@ describe("printable postcard PDF", () => {
     expect(fonts.some((f) => f.includes("Fraunces"))).toBe(true);
     expect(fonts.some((f) => f.includes("Atkinson"))).toBe(true);
     expect(report.continuation).toBe(false);
+    // regression: subsetting the variable Caveat font dropped glyphs ("Love, Alex" printed as "A"),
+    // so it must be embedded whole: subsets here are ~5 KB, the whole compressed font ~218 KB
+    expect(await embeddedFontBytes(bytes, "Caveat")).toBeGreaterThan(50_000);
   });
 
   it("builds an intentional card from a single photo", async () => {
