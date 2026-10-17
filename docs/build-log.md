@@ -1,6 +1,6 @@
 # Snailpost — Build Log & Design Decisions
 
-This is the local, versioned record. The Google Doc of the same name is **BLOCKED** (see F). This log keeps two things apart: what is *intended* (PLANNED, BLOCKED) and what *works*, which is IMPLEMENTED and then VERIFIED once tests pass.
+This is the local, versioned record. The Google Doc of the same name now exists (id in `docs/build-log.config.json`) but holds only a placeholder until it can be synced (see F). This log keeps two things apart: what is *intended* (PLANNED, BLOCKED) and what *works*, which is IMPLEMENTED and then VERIFIED once tests pass.
 
 ## A. Current build
 
@@ -37,7 +37,7 @@ Data source: **local** = IndexedDB on this device, **fixture** = bundled sample 
 | QR on print | Only for a real https link and only with voice; "Scan to hear my day." | `lib/pdf.ts` | VERIFIED (generation + decode); BLOCKED (no real link) | — | unit: decodes to the exact URL; localhost refused | — |
 | Two appearances + text size | Postcard Studio / Easy Reading; larger text; persists | `AppearanceProvider`, `/settings` | VERIFIED | per-viewer localStorage | e2e larger text + reflow; screenshots | — |
 | Private-link headers | `no-store`, `noindex`, `no-referrer`, generic link preview | `next.config.ts`, `/p/[token]` | VERIFIED | — | e2e response headers, no `og:image` | — |
-| Google Doc build log | — | — | **BLOCKED** | — | Drive "Insufficient scope" | Reconnect Drive with write scope |
+| Google Doc build log | — | — | **IN PROGRESS** | — | Doc created; holds a placeholder | Sync content (needs the Google Docs connector) |
 | Vercel preview | — | — | **BLOCKED** | — | — | Connect the repo (docs/deploy.md) |
 
 ## C. Design decisions
@@ -114,7 +114,7 @@ Data source: **local** = IndexedDB on this device, **fixture** = bundled sample 
 ## F. Known limitations and next steps
 
 - **Cross-device links: BLOCKED.** Follow `docs/supabase-setup.md`, then run `tests/e2e/publish.spec.ts`. Clean-up of abandoned server uploads and migrating drafts to an email account are not built.
-- **Google Doc: BLOCKED.** Google Drive `create_file` failed on 2026-10-16 with "Insufficient scope" (the connector is read-only). Reconnect Google Drive with write access, and enable the Google Docs connector so the same document can be updated in place. Its id will then go in `docs/build-log.config.json`.
+- **Google Doc: PARTIAL.** After Google Drive was reconnected, the Doc was created on 2026-10-16 (id in `docs/build-log.config.json`). It holds only a placeholder: Drive can create files but not edit them, so syncing this log into it needs the Google Docs editing connector.
 - **Vercel preview: BLOCKED** until the repo is connected (`docs/deploy.md`).
 - **Real devices: NOT RUN.** Share sheet, microphone and codecs, camera, HEIC, in-app messaging browsers, manual screen reader, printer duplex.
 - **Exploration gaps:** a second card composition and a direct-to-card recipient entry were not prototyped.
