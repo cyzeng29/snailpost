@@ -123,6 +123,11 @@ export function RecipientView({ content, shareUrl }: { content: PostcardContent;
                     back={<PostcardBack content={content} />}
                   />
                   <div className="mx-auto mt-8 max-w-[38rem] space-y-4">
+                    <section aria-label="The message" className="rounded-[12px] border border-line bg-surface-raised p-5">
+                      <p className="m-0">Dear {content.recipientName.trim() || "you"},</p>
+                      <p className="m-0 mt-2 whitespace-pre-line">{content.note}</p>
+                      <p className="m-0 mt-2">Love, {sender}</p>
+                    </section>
                     <h2 className="m-0 text-[1.15rem] font-bold">The moments</h2>
                     <ol className="m-0 list-decimal space-y-2 pl-6 marker:font-bold">
                       {content.moments.map((m) => (
