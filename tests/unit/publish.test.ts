@@ -42,6 +42,14 @@ describe("server-side content validation", () => {
     expect(c.moments[0].path).toContain(OWNER);
     expect(c.voice?.durationSec).toBe(16);
   });
+  it("keeps the sender's reading setup and rejects unknown values", () => {
+    const reading = { view: "simple", textSize: "largest", playVoiceOnOpen: true, showVoiceWords: false };
+    expect(validatePublishedContent({ ...good(), reading }, OWNER, SNAP).reading).toEqual(reading);
+    expect(validatePublishedContent(good(), OWNER, SNAP).reading).toBeUndefined();
+    expect(() => validatePublishedContent({ ...good(), reading: { ...reading, view: "tiny" } }, OWNER, SNAP)).toThrow(/reading view/);
+    expect(() => validatePublishedContent({ ...good(), reading: { ...reading, textSize: "huge" } }, OWNER, SNAP)).toThrow(/text size/);
+    expect(() => validatePublishedContent({ ...good(), reading: { ...reading, playVoiceOnOpen: "yes" } }, OWNER, SNAP)).toThrow(/reading options/);
+  });
   it("rejects media outside the sender's own folder", () => {
     const c = good();
     c.moments[0].path = `someone-else/${SNAP}/photo-1.jpg`;

@@ -56,6 +56,11 @@
 [data-appearance="reading"][data-text-size="large"] {
   --font-size-base: 23px;
 }
+/* Largest: about 20 pt body text, for readers who need it most. */
+[data-text-size="largest"] {
+  --font-size-base: 26px;
+  --target: 56px;
+}
 
 @theme inline {
   --color-paper: var(--paper);

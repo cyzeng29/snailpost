@@ -2,12 +2,15 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { useAppearance } from "@/components/AppearanceProvider";
 import { CreatorShell } from "@/components/creator/CreatorShell";
+import { ReadingSetupFields } from "@/components/creator/ReadingSetupFields";
 import { Steps } from "@/components/creator/Steps";
 import { FlipCard, type Face } from "@/components/postcard/FlipCard";
 import { LetterView } from "@/components/postcard/LetterView";
 import { PostcardBack, PostcardFront } from "@/components/postcard/PostcardFaces";
 import { PrintButton } from "@/components/print/PrintButton";
+import { SimpleReader } from "@/components/recipient/SimpleReader";
 import { ShareActions } from "@/components/share/ShareActions";
 import { readiness, type PostcardContent, type Snapshot } from "@/lib/model";
 import { publishingConfigured, publishSnapshot } from "@/lib/publish/client";
@@ -25,10 +28,11 @@ type ShareState =
 
 export function PreviewClient() {
   const { id } = useParams<{ id: string }>();
-  const { draft, load } = useDraft(id);
+  const { draft, load, update } = useDraft(id);
   const content = useDraftContent(draft);
+  const { prefs } = useAppearance();
   const [face, setFace] = useState<Face>("front");
-  const [mode, setMode] = useState<"card" | "letter">("card");
+  const [mode, setMode] = useState<"card" | "letter" | "pages">("card");
   const [share, setShare] = useState<ShareState>({ s: "idle" });
   const [freezeError, setFreezeError] = useState(false);
   const releaseRef = useRef<(() => void) | null>(null);
@@ -64,7 +68,12 @@ export function PreviewClient() {
     );
 
   const problems = readiness(draft);
-  const snapStale = "snap" in share && new Date(draft.updatedAt) > new Date(share.snap.createdAt);
+  const reading = draft.reading ?? prefs.sendDefaults;
+  // a changed reading setup counts too: it shows up here before the draft's save time does
+  const snapStale =
+    "snap" in share &&
+    (new Date(draft.updatedAt) > new Date(share.snap.createdAt) || JSON.stringify(share.snap.content.reading) !== JSON.stringify(reading));
+  const who = draft.recipient.name.trim() || "they";
 
   /** Freeze exactly what was reviewed. Guarded so a double tap makes one version. */
   const getReady = async () => {
@@ -73,7 +82,8 @@ export function PreviewClient() {
     setShare({ s: "freezing" });
     setFreezeError(false);
     try {
-      const snap = await createSnapshot(draft);
+      // the ready version carries the reading setup the sender saw here
+      const snap = await createSnapshot({ ...draft, reading });
       const { content: c, release } = await resolveContent({ kind: "snapshot", snapshot: snap });
       releaseRef.current?.();
       releaseRef.current = release;
@@ -121,10 +131,15 @@ export function PreviewClient() {
             <button type="button" className={`btn ${mode === "letter" ? "btn-primary" : "btn-secondary"}`} aria-pressed={mode === "letter"} onClick={() => setMode("letter")}>
               Read as a letter
             </button>
+            <button type="button" className={`btn ${mode === "pages" ? "btn-primary" : "btn-secondary"}`} aria-pressed={mode === "pages"} onClick={() => setMode("pages")}>
+              One page at a time
+            </button>
           </div>
 
           <div className="mt-6">
-            {mode === "card" ? (
+            {mode === "pages" ? (
+              <SimpleReader content={{ ...content, reading }} showVoiceWords={reading.showVoiceWords} />
+            ) : mode === "card" ? (
               <FlipCard className="mx-auto max-w-[44rem]" face={face} onFaceChange={setFace} label="Your postcard" front={<PostcardFront content={content} />} back={<PostcardBack content={content} />} />
             ) : (
               <LetterView content={content} />
@@ -132,7 +147,19 @@ export function PreviewClient() {
           </div>
         </section>
 
-        <aside aria-label="Ready to share" className="min-w-0">
+        <aside aria-label="Ready to share" className="min-w-0 space-y-5">
+          <details className="rounded-[16px] border border-line bg-surface-raised p-5" data-testid="reading-setup">
+            <summary className="cursor-pointer">
+              <span className="display text-[1.25rem] font-[600]">How it opens for {who}</span>
+              <span className="mt-1 block text-[0.95rem] text-text-soft">
+                {reading.view === "simple" ? "One page at a time" : "Everything on one page"}, {reading.textSize === "normal" ? "regular" : reading.textSize} text
+                {draft.voice ? (reading.playVoiceOnOpen ? ", voice starts on open" : ", voice plays when tapped") : ""}
+              </span>
+            </summary>
+            <div className="mt-4">
+              <ReadingSetupFields value={reading} onChange={(r) => void update((d) => ({ ...d, reading: r }))} who={who} />
+            </div>
+          </details>
           {share.s === "idle" || share.s === "freezing" ? (
             <div className="rounded-[16px] border border-line bg-surface-raised p-5">
               <h2 className="display m-0 text-[1.4rem] font-[600]">Happy with it?</h2>

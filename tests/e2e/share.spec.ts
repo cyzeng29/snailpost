@@ -93,3 +93,26 @@ test.describe("bearer-link pages", () => {
     await expect(page.locator('meta[property="og:image"]')).toHaveCount(0);
   });
 });
+
+test.describe("setting up how it opens for them", () => {
+  test("new postcards start from the Settings defaults and can be changed per postcard", async ({ page }) => {
+    await page.goto("/settings");
+    const send = page.getByRole("region", { name: "For the people you send to" });
+    await send.getByLabel("Largest").check(); // already the default
+    await send.getByRole("checkbox", { name: /Start playing/ }).uncheck();
+
+    await makeReadyPostcard(page);
+    const setup = page.getByTestId("reading-setup");
+    await expect(setup).toContainText("One page at a time, largest text");
+
+    await page.getByRole("button", { name: "One page at a time" }).click();
+    await expect(page.getByTestId("simple-reader")).toBeVisible();
+    await expect(page.getByText("Page 1 of 5", { exact: true })).toBeVisible();
+
+    // the setup is part of the ready version, so changing it asks for a new one
+    await setup.locator("summary").click();
+    await setup.getByLabel(/Everything on one page/).check();
+    await expect(setup.locator("summary")).toContainText("Everything on one page");
+    await expect(page.getByText("You've changed the postcard since this version.")).toBeVisible();
+  });
+});

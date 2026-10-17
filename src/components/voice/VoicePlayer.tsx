@@ -1,5 +1,7 @@
 "use client";
-// Never autoplays. Play/pause, replay, elapsed/duration, and a gentle failure
+// Plays only after a tap: either its own button, or (with `autoPlay`) the
+// "Open postcard" tap that mounted it. If the browser still blocks that, the
+// big play button is simply waiting. Play/pause, replay, elapsed/duration, and a gentle failure
 // state that keeps the written story available.
 import { useEffect, useRef, useState } from "react";
 import { formatClock } from "@/lib/audio";
@@ -9,12 +11,15 @@ export function VoicePlayer({
   durationSec,
   label,
   large = false,
+  autoPlay = false,
 }: {
   src: string;
   durationSec?: number;
   /** e.g. "Play Alex's voice" */
   label: string;
   large?: boolean;
+  /** only pass true straight after the listener tapped to open */
+  autoPlay?: boolean;
 }) {
   const audio = useRef<HTMLAudioElement>(null);
   const [playing, setPlaying] = useState(false);
@@ -25,8 +30,13 @@ export function VoicePlayer({
 
   useEffect(() => {
     const a = audio.current;
+    if (autoPlay && a) {
+      setStarted(true);
+      // a blocked autoplay is not a failure: the play button stays ready
+      a.play().catch(() => setStarted(false));
+    }
     return () => a?.pause();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- only on mount
 
   const play = async () => {
     const a = audio.current;

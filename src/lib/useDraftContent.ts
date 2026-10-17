@@ -69,6 +69,7 @@ export function useDraftContent(draft: Draft | undefined): PostcardContent | und
         .filter((m) => m.src),
       voice: draft.voice && url(draft.voice.blobId) ? { src: url(draft.voice.blobId), mimeType: draft.voice.mimeType, durationSec: draft.voice.durationSec } : undefined,
       written: draft.written?.text.trim() ? draft.written : undefined,
+      reading: draft.reading,
     };
   }, [draft, urls]);
 }

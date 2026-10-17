@@ -1,7 +1,8 @@
 "use client";
 // The recipient's calm, Easy Reading experience. No sign-up, no creator
 // navigation. One short envelope opening on first visit; repeat visits go
-// straight to the card.
+// straight to the card. The sender's reading setup picks the view, text size
+// and whether the voice starts on open; the reader can change any of it.
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { useAppearance } from "@/components/AppearanceProvider";
@@ -10,8 +11,11 @@ import { FlipCard, type Face } from "@/components/postcard/FlipCard";
 import { LetterView } from "@/components/postcard/LetterView";
 import { PostcardBack, PostcardFront } from "@/components/postcard/PostcardFaces";
 import { PrintButton } from "@/components/print/PrintButton";
+import { SimpleReader } from "@/components/recipient/SimpleReader";
 import { VoicePlayer } from "@/components/voice/VoicePlayer";
-import { formatDay, type PostcardContent } from "@/lib/model";
+import { formatDay, TEXT_SIZES, type PostcardContent } from "@/lib/model";
+
+const TEXT_SIZE_NAMES = { normal: "Regular text", large: "Larger text", largest: "Largest text" } as const;
 
 const OPENED_KEY = "snailpost.opened";
 
@@ -33,12 +37,22 @@ function markOpened(id: string) {
 
 export function RecipientView({ content, shareUrl }: { content: PostcardContent; shareUrl?: string }) {
   const [opened, setOpened] = useState(false);
+  /** true only when they tapped "Open postcard" just now, so the voice may start */
+  const [tappedOpen, setTappedOpen] = useState(false);
   const [face, setFace] = useState<Face>("front");
   const [mode, setMode] = useState<"card" | "letter">("card");
   const reduce = useReducedMotion();
-  const { prefs, setTextSize, setAppearance } = useAppearance();
+  const { prefs, setAppearance, setSenderSetup, readerTextSize, setReaderTextSize, readerView, setReaderView } = useAppearance();
   const headingRef = useRef<HTMLHeadingElement>(null);
   const sender = content.senderName.trim() || "Someone";
+  const reading = content.reading;
+  const view = readerView;
+  const autoPlay = tappedOpen && !!reading?.playVoiceOnOpen;
+
+  useEffect(() => {
+    setSenderSetup(reading);
+    return () => setSenderSetup(undefined);
+  }, [reading, setSenderSetup]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- read per-viewer storage after mount
@@ -47,9 +61,41 @@ export function RecipientView({ content, shareUrl }: { content: PostcardContent;
 
   const open = () => {
     setOpened(true);
+    setTappedOpen(true);
     markOpened(content.id);
     requestAnimationFrame(() => headingRef.current?.focus());
   };
+
+  const options = (
+    <section className={view === "simple" ? "border-t border-line pt-6" : "mx-auto mt-10 max-w-[38rem] border-t border-line pt-6"} aria-label="Reading options">
+      <h2 className="m-0 text-[1.15rem] font-bold">Make it easier to read</h2>
+      <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Text size">
+        {TEXT_SIZES.map((t) => (
+          <button key={t} type="button" className={`btn ${readerTextSize === t ? "btn-primary" : "btn-secondary"}`} aria-pressed={readerTextSize === t} onClick={() => setReaderTextSize(t)}>
+            {TEXT_SIZE_NAMES[t]}
+          </button>
+        ))}
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <button type="button" className="btn btn-secondary" onClick={() => setReaderView(view === "simple" ? "full" : "simple")}>
+          {view === "simple" ? "Show everything on one page" : "Show one page at a time"}
+        </button>
+        <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={() => setAppearance("reader", prefs.reader === "reading" ? "studio" : "reading")}
+        >
+          {prefs.reader === "reading" ? "Switch to the colorful look" : "Switch to the calm look"}
+        </button>
+      </div>
+
+      <h2 className="mt-8 text-[1.15rem] font-bold">Keep it</h2>
+      <p className="mt-1">Print it for the fridge or a keepsake box.</p>
+      <div className="mt-3">
+        <PrintButton content={content} shareUrl={shareUrl} label="Print this postcard" />
+      </div>
+    </section>
+  );
 
   return (
     <div className="mx-auto w-full max-w-[52rem] px-4 pb-16 pt-4 sm:px-6">
@@ -78,6 +124,7 @@ export function RecipientView({ content, shareUrl }: { content: PostcardContent;
             <button type="button" className="btn btn-primary mt-8 min-w-[14rem] text-[1.15rem]" onClick={open} autoFocus>
               Open postcard
             </button>
+            {content.voice && reading?.playVoiceOnOpen && <p className="mt-3 text-text-soft">{sender}&apos;s voice will start playing.</p>}
           </motion.section>
         ) : (
           <motion.main
@@ -95,86 +142,76 @@ export function RecipientView({ content, shareUrl }: { content: PostcardContent;
               {content.fromPlace ? ` · ${content.fromPlace}` : ""}
             </p>
 
-            <div className="mt-5 flex flex-wrap gap-2" role="group" aria-label="How to read it">
-              <button type="button" className={`btn ${mode === "card" ? "btn-primary" : "btn-secondary"}`} aria-pressed={mode === "card"} onClick={() => setMode("card")}>
-                See the postcard
-              </button>
-              <button type="button" className={`btn ${mode === "letter" ? "btn-primary" : "btn-secondary"}`} aria-pressed={mode === "letter"} onClick={() => setMode("letter")}>
-                Read as a letter
-              </button>
-            </div>
-
-            {content.voice && (
-              <div className="mt-5">
-                <VoicePlayer src={content.voice.src} durationSec={content.voice.durationSec} label={`Play ${sender}'s voice`} large />
-                {content.isSample && <p className="mt-2 text-[0.9rem] text-text-soft">Sample narration: computer-generated voice, not a real recording.</p>}
+            {view === "simple" ? (
+              <div className="mt-6">
+                <SimpleReader content={content} autoPlay={autoPlay} showVoiceWords={reading?.showVoiceWords ?? true} end={options} />
               </div>
-            )}
+            ) : (
+              <>
+                <div className="mt-5 flex flex-wrap gap-2" role="group" aria-label="How to read it">
+                  <button type="button" className={`btn ${mode === "card" ? "btn-primary" : "btn-secondary"}`} aria-pressed={mode === "card"} onClick={() => setMode("card")}>
+                    See the postcard
+                  </button>
+                  <button type="button" className={`btn ${mode === "letter" ? "btn-primary" : "btn-secondary"}`} aria-pressed={mode === "letter"} onClick={() => setMode("letter")}>
+                    Read as a letter
+                  </button>
+                </div>
 
-            <div className="mt-6">
-              {mode === "card" ? (
-                <>
-                  <FlipCard
-                    className="mx-auto max-w-[44rem]"
-                    face={face}
-                    onFaceChange={setFace}
-                    label={content.title || "Postcard"}
-                    front={<PostcardFront content={content} />}
-                    back={<PostcardBack content={content} />}
-                  />
-                  <div className="mx-auto mt-8 max-w-[38rem] space-y-4">
-                    <section aria-label="The message" className="rounded-[12px] border border-line bg-surface-raised p-5">
-                      <p className="m-0">Dear {content.recipientName.trim() || "you"},</p>
-                      <p className="m-0 mt-2 whitespace-pre-line">{content.note}</p>
-                      <p className="m-0 mt-2">Love, {sender}</p>
-                    </section>
-                    <h2 className="m-0 text-[1.15rem] font-bold">The moments</h2>
-                    <ol className="m-0 list-decimal space-y-2 pl-6 marker:font-bold">
-                      {content.moments.map((m) => (
-                        <li key={m.id}>{m.caption || "A photo"}</li>
-                      ))}
-                    </ol>
-                    {content.written?.text && (
-                      <details className="rounded-[10px] border border-line bg-surface-raised p-4">
-                        <summary className="cursor-pointer font-bold">
-                          {content.written.kind === "transcript" ? "Read what the voice note says" : "Read a written summary of the voice note"}
-                        </summary>
-                        <p className="mt-3 whitespace-pre-line">{content.written.text}</p>
-                      </details>
-                    )}
+                {content.voice && (
+                  <div className="mt-5">
+                    <VoicePlayer src={content.voice.src} durationSec={content.voice.durationSec} label={`Play ${sender}'s voice`} large autoPlay={autoPlay} />
+                    {content.isSample && <p className="mt-2 text-[0.9rem] text-text-soft">Sample narration: computer-generated voice, not a real recording.</p>}
                   </div>
-                </>
-              ) : (
-                <LetterView content={content} />
-              )}
-            </div>
+                )}
 
-            <section className="mx-auto mt-10 max-w-[38rem] border-t border-line pt-6" aria-label="Reading options">
-              <h2 className="m-0 text-[1.15rem] font-bold">Make it easier to read</h2>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  aria-pressed={prefs.textSize === "large"}
-                  onClick={() => setTextSize(prefs.textSize === "large" ? "normal" : "large")}
-                >
-                  {prefs.textSize === "large" ? "Use regular text" : "Use larger text"}
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setAppearance("reader", prefs.reader === "reading" ? "studio" : "reading")}
-                >
-                  {prefs.reader === "reading" ? "Switch to the colorful look" : "Switch to the calm look"}
-                </button>
-              </div>
-
-              <h2 className="mt-8 text-[1.15rem] font-bold">Keep it</h2>
-              <p className="mt-1">Print it for the fridge or a keepsake box.</p>
-              <div className="mt-3">
-                <PrintButton content={content} shareUrl={shareUrl} label="Print this postcard" />
-              </div>
-            </section>
+                <div className="mt-6">
+                  {mode === "card" ? (
+                    <>
+                      <FlipCard
+                        className="mx-auto max-w-[44rem]"
+                        face={face}
+                        onFaceChange={setFace}
+                        label={content.title || "Postcard"}
+                        front={<PostcardFront content={content} />}
+                        back={<PostcardBack content={content} />}
+                      />
+                      <div className="mx-auto mt-8 max-w-[38rem] space-y-4">
+                        <section aria-label="The message" className="rounded-[12px] border border-line bg-surface-raised p-5">
+                          <p className="m-0">Dear {content.recipientName.trim() || "you"},</p>
+                          <p className="m-0 mt-2 whitespace-pre-line">{content.note}</p>
+                          <p className="m-0 mt-2">Love, {sender}</p>
+                        </section>
+                        <h2 className="m-0 text-[1.15rem] font-bold">The moments</h2>
+                        <ol className="m-0 list-decimal space-y-2 pl-6 marker:font-bold">
+                          {content.moments.map((m) => (
+                            <li key={m.id}>{m.caption || "A photo"}</li>
+                          ))}
+                        </ol>
+                        {content.written?.text && reading?.showVoiceWords && (
+                          <section aria-label="The voice note in words" className="rounded-[10px] border border-line bg-surface-raised p-4">
+                            <h3 className="m-0 text-[1rem] font-bold">
+                              {content.written.kind === "transcript" ? `What ${sender} says` : `About ${sender}'s voice note (not word for word)`}
+                            </h3>
+                            <p className="m-0 mt-2 whitespace-pre-line">{content.written.text}</p>
+                          </section>
+                        )}
+                        {content.written?.text && !reading?.showVoiceWords && (
+                          <details className="rounded-[10px] border border-line bg-surface-raised p-4">
+                            <summary className="cursor-pointer font-bold">
+                              {content.written.kind === "transcript" ? "Read what the voice note says" : "Read a written summary of the voice note"}
+                            </summary>
+                            <p className="mt-3 whitespace-pre-line">{content.written.text}</p>
+                          </details>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <LetterView content={content} />
+                  )}
+                </div>
+                {options}
+              </>
+            )}
 
             <div className="mt-12 flex flex-col items-center gap-2 text-center">
               <Spiral className="h-7 w-7" />

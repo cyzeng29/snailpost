@@ -100,11 +100,14 @@ test.describe("recipient opening and the card turn", () => {
 
   test("larger text setting persists and reflows without horizontal scroll", async ({ page }) => {
     await openDemo(page);
-    await page.getByRole("button", { name: "Use larger text" }).click();
+    await page.getByRole("button", { name: "Larger text" }).click();
     await expect(page.locator("html")).toHaveAttribute("data-text-size", "large");
     await expectNoHorizontalOverflow(page);
     await page.reload();
     await expect(page.locator("html")).toHaveAttribute("data-text-size", "large");
+    await page.getByRole("button", { name: "Largest text" }).click();
+    await expect(page.locator("html")).toHaveAttribute("data-text-size", "largest");
+    await expectNoHorizontalOverflow(page);
   });
 
   test("automated accessibility scan: recipient page (card and letter)", async ({ page }) => {
@@ -112,6 +115,77 @@ test.describe("recipient opening and the card turn", () => {
     await expectNoA11yViolations(page);
     await page.getByRole("button", { name: "Read as a letter" }).click();
     await page.waitForTimeout(300); // let the 150 ms button colour transition settle
+    await expectNoA11yViolations(page);
+  });
+});
+
+test.describe("one page at a time (the sender's default setup)", () => {
+  async function openSimple(page: import("@playwright/test").Page) {
+    await page.goto("/demo/simple");
+    await expect(page.getByText("Alex's voice will start playing.")).toBeVisible();
+    await page.getByRole("button", { name: "Open postcard" }).click();
+    await expect(page.getByTestId("simple-reader")).toBeVisible();
+    await expect(page.locator("main").first()).toHaveCSS("opacity", "1");
+  }
+
+  test("opens with the sender's setup: largest text, voice starting, words shown", async ({ page, browserName }) => {
+    await openSimple(page);
+    await expect(page.locator("html")).toHaveAttribute("data-text-size", "largest");
+    await expect(page.getByRole("heading", { name: "What Alex says" })).toBeVisible();
+    // the Open tap counts as permission to play; WebKit in automation may still block it
+    if (browserName === "chromium") {
+      await expect.poll(() => page.locator("audio").evaluate((a: HTMLAudioElement) => !a.paused)).toBe(true);
+      await expect(page.getByRole("button", { name: "Pause" })).toBeVisible();
+    } else {
+      await expect(page.getByRole("button", { name: /Pause|Listen to Alex/ })).toBeVisible();
+    }
+  });
+
+  test("turns pages with Back and Next only, one thing per page", async ({ page }) => {
+    await openSimple(page);
+    const back = page.getByRole("button", { name: "Back", exact: true });
+    const next = page.getByRole("button", { name: "Next" });
+    await expect(back).toBeDisabled();
+    await expect(page.getByText("Page 1 of 7", { exact: true })).toBeVisible();
+    // tapping the card does nothing surprising: there is no tap-to-turn here
+    await expect(page.locator("[data-face]")).toHaveCount(0);
+
+    await next.click();
+    await expect(page.getByRole("heading", { name: /Moment 1 of 4/ })).toBeFocused();
+    await expect(page.getByRole("img", { name: "Photo: Tried your eggs. Still not as good as yours." })).toBeVisible();
+    for (let i = 0; i < 4; i++) await next.click();
+    await expect(page.getByRole("heading", { name: /A message from Alex/ })).toBeVisible();
+    await expect(page.getByText("Dear Grandma,")).toBeVisible();
+    await next.click();
+    await expect(page.getByRole("heading", { name: /That's the whole postcard/ })).toBeVisible();
+    await expect(next).toBeDisabled();
+    await expect(page.getByRole("button", { name: "Print this postcard" })).toBeVisible();
+    await page.getByRole("button", { name: "Start again from the beginning" }).click();
+    await expect(page.getByText("Page 1 of 7", { exact: true })).toBeVisible();
+  });
+
+  test("the reader can switch to everything on one page, and it sticks", async ({ page }) => {
+    await openSimple(page);
+    for (let i = 0; i < 6; i++) await page.getByRole("button", { name: "Next" }).click();
+    await page.getByRole("button", { name: "Show everything on one page" }).click();
+    await expect(page.getByTestId("simple-reader")).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Read the back" })).toBeVisible();
+    await page.reload();
+    await expect(page.getByTestId("simple-reader")).toHaveCount(0);
+  });
+
+  test("no horizontal overflow at 320px with the largest text", async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 800 });
+    await openSimple(page);
+    await expectNoHorizontalOverflow(page);
+    await page.getByRole("button", { name: "Next" }).click();
+    await expectNoHorizontalOverflow(page);
+  });
+
+  test("automated accessibility scan: one page at a time", async ({ page }) => {
+    await openSimple(page);
+    await page.getByRole("button", { name: "Pause" }).click().catch(() => {});
+    await page.waitForTimeout(300);
     await expectNoA11yViolations(page);
   });
 });

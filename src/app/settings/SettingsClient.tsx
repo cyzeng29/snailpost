@@ -2,6 +2,8 @@
 import Link from "next/link";
 import { useAppearance, type Appearance } from "@/components/AppearanceProvider";
 import { CreatorShell } from "@/components/creator/CreatorShell";
+import { ReadingSetupFields, TEXT_SIZE_NAMES } from "@/components/creator/ReadingSetupFields";
+import { TEXT_SIZES } from "@/lib/model";
 import { publishingConfigured } from "@/lib/publish/client";
 
 const LOOKS: { value: Appearance; name: string; desc: string }[] = [
@@ -10,12 +12,13 @@ const LOOKS: { value: Appearance; name: string; desc: string }[] = [
 ];
 
 export function SettingsClient() {
-  const { prefs, setAppearance, setTextSize } = useAppearance();
+  const { prefs, setAppearance, setTextSize, setSendDefaults } = useAppearance();
   return (
     <CreatorShell>
       <h1 className="display m-0 text-[2rem] font-[600]">Settings</h1>
 
-      <fieldset className="mt-8 border-0 p-0">
+      <h2 className="mt-8 text-[1.4rem] font-bold">For you</h2>
+      <fieldset className="mt-3 border-0 p-0">
         <legend className="text-[1.15rem] font-bold">How Snailpost looks for you</legend>
         <p className="m-0 mt-1 text-text-soft">The same postcards, presented two ways. People you send to start with Easy Reading and can switch.</p>
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -32,16 +35,27 @@ export function SettingsClient() {
       </fieldset>
 
       <fieldset className="mt-8 border-0 p-0">
-        <legend className="text-[1.15rem] font-bold">Text size</legend>
+        <legend className="text-[1.15rem] font-bold">Your text size</legend>
         <div className="mt-3 flex flex-wrap gap-2">
-          {(["normal", "large"] as const).map((t) => (
+          {TEXT_SIZES.map((t) => (
             <label key={t} className={`flex min-h-[var(--target)] cursor-pointer items-center gap-2 rounded-full border-2 px-4 ${prefs.textSize === t ? "border-ink" : "border-line"}`}>
               <input type="radio" name="text" className="h-5 w-5 accent-[var(--clay)]" checked={prefs.textSize === t} onChange={() => setTextSize(t)} />
-              {t === "normal" ? "Regular" : "Larger"}
+              {TEXT_SIZE_NAMES[t]}
             </label>
           ))}
         </div>
       </fieldset>
+
+      <section className="mt-10 border-t border-line pt-6" aria-labelledby="h-send">
+        <h2 id="h-send" className="m-0 text-[1.4rem] font-bold">For the people you send to</h2>
+        <p className="m-0 mt-1 text-text-soft">
+          Set this up once and every new postcard opens this way, so they don&apos;t have to change anything. You can change it for one postcard on its
+          Preview page, and they can still change it on their own phone.
+        </p>
+        <div className="mt-4">
+          <ReadingSetupFields value={prefs.sendDefaults} onChange={setSendDefaults} who="they" />
+        </div>
+      </section>
 
       <section className="mt-10 border-t border-line pt-6">
         <h2 className="m-0 text-[1.15rem] font-bold">Where your postcards live</h2>
@@ -56,6 +70,10 @@ export function SettingsClient() {
         <p className="mt-2">
           <Link href="/demo" className="font-bold underline">
             See the sample postcard
+          </Link>
+          {" · "}
+          <Link href="/demo/simple" className="font-bold underline">
+            See it one page at a time
           </Link>
         </p>
       </section>

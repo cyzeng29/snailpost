@@ -1,7 +1,7 @@
 // Server-side validation of published content. Never trust the client: limits,
 // types and media ownership are all re-checked here. Pure, so it is unit-tested.
 import { STAMPS } from "../brand";
-import { MAX_MOMENTS, NOTE_LIMIT, TITLE_LIMIT, type PostcardContent } from "../model";
+import { MAX_MOMENTS, NOTE_LIMIT, TEXT_SIZES, TITLE_LIMIT, type PostcardContent, type ReadingSetup } from "../model";
 
 export type StoredContent = Omit<PostcardContent, "moments" | "voice" | "isSample" | "sampleNotice"> & {
   moments: (Omit<PostcardContent["moments"][number], "src"> & { path: string })[];
@@ -63,6 +63,15 @@ export function validatePublishedContent(raw: unknown, ownerId: string, snapshot
     written = { kind: w.kind, text: str(w.text, 1200, "written")! };
   }
 
+  let reading: ReadingSetup | undefined;
+  if (c.reading) {
+    const r = c.reading as Record<string, unknown>;
+    if (r.view !== "simple" && r.view !== "full") throw new Error("invalid reading view");
+    if (!TEXT_SIZES.includes(r.textSize as ReadingSetup["textSize"])) throw new Error("invalid reading text size");
+    if (typeof r.playVoiceOnOpen !== "boolean" || typeof r.showVoiceWords !== "boolean") throw new Error("invalid reading options");
+    reading = { view: r.view, textSize: r.textSize as ReadingSetup["textSize"], playVoiceOnOpen: r.playVoiceOnOpen, showVoiceWords: r.showVoiceWords };
+  }
+
   return {
     id: snapshotId,
     title: str(c.title, TITLE_LIMIT, "title") ?? "",
@@ -77,5 +86,6 @@ export function validatePublishedContent(raw: unknown, ownerId: string, snapshot
     moments,
     voice,
     written,
+    reading,
   };
 }

@@ -37,6 +37,27 @@ export interface VoiceNote {
 
 export type SaveState = "saving" | "saved" | "failed";
 
+export type TextSize = "normal" | "large" | "largest";
+export const TEXT_SIZES: TextSize[] = ["normal", "large", "largest"];
+
+/**
+ * How the postcard opens for the person receiving it. The sender sets this up
+ * on their own phone, so the recipient only has to open the link. The
+ * recipient can still change it on their own device.
+ */
+export interface ReadingSetup {
+  /** "simple": one thing per page with Back and Next; "full": everything on one page */
+  view: "simple" | "full";
+  textSize: TextSize;
+  /** start the voice note when they tap "Open postcard" */
+  playVoiceOnOpen: boolean;
+  /** show the written words of the voice note beside the player */
+  showVoiceWords: boolean;
+}
+
+/** Defaults for new postcards: the calmest, largest setup. */
+export const READING_DEFAULTS: ReadingSetup = { view: "simple", textSize: "largest", playVoiceOnOpen: true, showVoiceWords: true };
+
 export interface Draft {
   id: string;
   createdAt: string;
@@ -55,6 +76,8 @@ export interface Draft {
   voice?: VoiceNote;
   /** Always-readable words for the voice note. Never labelled verbatim unless the sender says so. */
   written?: { kind: WrittenKind; text: string };
+  /** how it opens for the recipient; unset means the sender's saved defaults */
+  reading?: ReadingSetup;
   /** id of the latest frozen snapshot made from this draft, if any */
   lastSnapshotId?: string;
 }
@@ -85,6 +108,8 @@ export interface PostcardContent {
   }[];
   voice?: { src: string; mimeType: string; durationSec: number };
   written?: { kind: WrittenKind; text: string };
+  /** unset (older postcards, the sample) means the full view with no autoplay */
+  reading?: ReadingSetup;
   /** true for the bundled fictional demo */
   isSample?: boolean;
   sampleNotice?: string;

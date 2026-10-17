@@ -174,6 +174,7 @@ export async function createSnapshot(draft: Draft): Promise<Snapshot> {
         ? { blobId: draft.voice.blobId, mimeType: draft.voice.mimeType, durationSec: draft.voice.durationSec }
         : undefined,
       written: draft.written?.text.trim() ? draft.written : undefined,
+      reading: draft.reading,
     },
   };
   await d.put("snapshots", snap);
@@ -244,6 +245,7 @@ export async function resolveContent(
         ? { src: await url(dr.voice.blobId), mimeType: dr.voice.mimeType, durationSec: dr.voice.durationSec }
         : undefined,
       written: dr.written?.text.trim() ? dr.written : undefined,
+      reading: dr.reading,
     };
   } else {
     const c = source.snapshot.content;
