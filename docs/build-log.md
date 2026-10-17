@@ -1,11 +1,11 @@
 # Snailpost — Build Log & Design Decisions
 
-This is the local, versioned record. The Google Doc of the same name now exists (id in `docs/build-log.config.json`) but holds only a placeholder until it can be synced (see F). This log keeps two things apart: what is *intended* (PLANNED, BLOCKED) and what *works*, which is IMPLEMENTED and then VERIFIED once tests pass.
+This is the local, versioned record. The Google Doc of the same name is a snapshot copy of it (link in `docs/build-log.config.json`). If the two differ, this file is the current one. This log keeps two things apart: what is *intended* (PLANNED, BLOCKED) and what *works*, which is IMPLEMENTED and then VERIFIED once tests pass.
 
 ## A. Current build
 
 - **Last updated:** 2026-10-16, evening (America/New_York)
-- **Build:** branch `build/v1`. Tests below were run on commit `9b24a3d` plus documentation-only changes.
+- **Build:** merged into `main` and pushed to GitHub (`cyzeng29/snailpost`). Tests below were run on commit `9b24a3d`; later commits changed documentation only.
 - **Start locally:** `npm install && npm run dev`, then open http://localhost:3000. Node 22+, no environment variables needed.
 - **Preview/deployment URL:** none. Vercel isn't connected yet; steps are in `docs/deploy.md`.
 - **Sender-to-recipient loop:** a sender can collect, compose, record, preview, freeze, print and keep postcards on one device, and the recipient experience works end to end with the bundled sample. Opening a *personal* postcard on another device is BLOCKED until a Supabase project is configured.
@@ -37,7 +37,7 @@ Data source: **local** = IndexedDB on this device, **fixture** = bundled sample 
 | QR on print | Only for a real https link and only with voice; "Scan to hear my day." | `lib/pdf.ts` | VERIFIED (generation + decode); BLOCKED (no real link) | — | unit: decodes to the exact URL; localhost refused | — |
 | Two appearances + text size | Postcard Studio / Easy Reading; larger text; persists | `AppearanceProvider`, `/settings` | VERIFIED | per-viewer localStorage | e2e larger text + reflow; screenshots | — |
 | Private-link headers | `no-store`, `noindex`, `no-referrer`, generic link preview | `next.config.ts`, `/p/[token]` | VERIFIED | — | e2e response headers, no `og:image` | — |
-| Google Doc build log | — | — | **IN PROGRESS** | — | Doc created; holds a placeholder | Sync content (needs the Google Docs connector) |
+| Google Doc build log | Snapshot copy of this log | `docs/build-log.config.json` | IMPLEMENTED (snapshot) | real service (Google Drive) | Doc created and read back | The connector can create Docs but not edit them, so each update means a fresh copy |
 | Vercel preview | — | — | **BLOCKED** | — | — | Connect the repo (docs/deploy.md) |
 
 ## C. Design decisions
@@ -114,7 +114,7 @@ Data source: **local** = IndexedDB on this device, **fixture** = bundled sample 
 ## F. Known limitations and next steps
 
 - **Cross-device links: BLOCKED.** Follow `docs/supabase-setup.md`, then run `tests/e2e/publish.spec.ts`. Clean-up of abandoned server uploads and migrating drafts to an email account are not built.
-- **Google Doc: PARTIAL.** After Google Drive was reconnected, the Doc was created on 2026-10-16 (id in `docs/build-log.config.json`). It holds only a placeholder: Drive can create files but not edit them, so syncing this log into it needs the Google Docs editing connector.
+- **Google Doc: snapshot only.** The connected Google Drive can create a Doc but not edit one, so the Google Doc is a snapshot of this log from 2026-10-16. Updating it in place would need a Google Docs editing connector; until then a fresh copy replaces it after each milestone.
 - **Vercel preview: BLOCKED** until the repo is connected (`docs/deploy.md`).
 - **Real devices: NOT RUN.** Share sheet, microphone and codecs, camera, HEIC, in-app messaging browsers, manual screen reader, printer duplex.
 - **Exploration gaps:** a second card composition and a direct-to-card recipient entry were not prototyped.
